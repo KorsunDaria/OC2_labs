@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 void *mythread(void *arg) {
     printf("arg = %p\n", arg);
@@ -23,7 +24,8 @@ int main() {
 	    printf("main: pthread_create() failed: %s\n", strerror(err));
 		return -1;
 	}
-	pthread_join(tid, NULL); 
-	return 0;
+    //sleep(10);
+    pthread_exit(0);
+	//return 0;
 }
 

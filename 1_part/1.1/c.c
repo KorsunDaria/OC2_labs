@@ -28,7 +28,7 @@ void *mythread(void *arg)
 	printf("&local_var = %p, &local_static_var = %p, &local_const_var = %p, &global_var = %p\n",
 		(void *)&local_var, (void *)&local_static_var,
 		(void *)&local_const_var, (void *)&global_var);
-
+    sleep(10);
 	return NULL;
 }
 
@@ -55,3 +55,10 @@ int main(void)
 
 	return 0;
 }
+
+/*
+./c &
+PID=$!
+sleep 1
+cat /proc/$PID/maps
+*/
