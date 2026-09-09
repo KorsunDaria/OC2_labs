@@ -4,6 +4,7 @@
 #include <pthread.h>
 
 void *f(void *a) {
+    printf("arg = %p\n", a);
     char *s = malloc(20);
     strcpy(s, "hello world");
     return (void *) s;

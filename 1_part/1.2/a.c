@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 void *f(void *a) {
+    printf("arg = %p\n", a);
     sleep(2);
     printf("done\n");
     return NULL;

@@ -3,8 +3,9 @@
 
 void *f(void *a)
 {
+    printf("arg = %p\n", a);
     pthread_detach(pthread_self());
-    printf("%lu\n", pthread_self());
+    printf("%lu\n", (unsigned long) pthread_self());
     return NULL;
 }
 
@@ -23,5 +24,7 @@ int main()
     }
     return 0;
 }
+
+
 
 //ps -o pid,vsize,comm -p \$(pgrep my_e)"
