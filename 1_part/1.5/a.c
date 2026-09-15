@@ -6,10 +6,10 @@
 
 void handler(int signo) {
     (void)signo;
-    write(1, "SIGINT поймал обработчик\n", 26);
+    write(1, "SIGINT поймал обработчик\n", 41); 
 }
 
-void *blocker(void *a) {           /* поток 1: блокирует все сигналы */
+void *blocker(void *a) {
     (void)a;
     sigset_t all;
     sigfillset(&all);
@@ -18,18 +18,20 @@ void *blocker(void *a) {           /* поток 1: блокирует все с
     return NULL;
 }
 
-void *sigint_thread(void *a) {     /* поток 2: обработчик SIGINT */
+void *sigint_thread(void *a) {
     (void)a;
     sigset_t s;
     sigemptyset(&s);
     sigaddset(&s, SIGINT);
-    pthread_sigmask(SIG_UNBLOCK, &s, NULL);
+    
     signal(SIGINT, handler);
+    pthread_sigmask(SIG_UNBLOCK, &s, NULL);
+
     while (1) pause();
     return NULL;
 }
 
-void *sigquit_thread(void *a) {    /* поток 3: sigwait на SIGQUIT */
+void *sigquit_thread(void *a) {
     (void)a;
     sigset_t s;
     int signo;
@@ -38,18 +40,21 @@ void *sigquit_thread(void *a) {    /* поток 3: sigwait на SIGQUIT */
     while (1) {
         sigwait(&s, &signo);
         printf("получен SIGQUIT\n");
+        fflush(stdout); 
     }
     return NULL;
 }
 
 int main(void) {
+    setvbuf(stdout, NULL, _IONBF, 0); 
+
     pthread_t t1, t2, t3;
     sigset_t s;
 
     sigemptyset(&s);
     sigaddset(&s, SIGINT);
     sigaddset(&s, SIGQUIT);
-    pthread_sigmask(SIG_BLOCK, &s, NULL);   /* маска наследуется потоками */
+    pthread_sigmask(SIG_BLOCK, &s, NULL); 
 
     int rc;
 

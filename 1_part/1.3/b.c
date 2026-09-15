@@ -24,7 +24,6 @@ int main() {
     pthread_t t;
     pthread_create(&t, &at, f, s);
     pthread_attr_destroy(&at);
-
-    sleep(1);
-    return 0;
+     
+    pthread_exit(NULL);
 }

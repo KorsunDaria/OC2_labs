@@ -4,6 +4,7 @@
 
 void *f(void *a)
 {
+    printf("arg = %p\n", a);
     while (1)
     {
         printf("!\n");
