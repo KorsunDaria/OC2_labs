@@ -3,7 +3,7 @@ CFLAGS  = -Wall -Wextra -Werror -std=gnu11
 LDFLAGS = -pthread
 
 SRCS    = $(wildcard *.c)
-BINS    = $(patsubst %.c,my_%,$(SRCS))
+BINS    = $(patsubst %.c,%,$(SRCS))
 
 .PHONY: all clean
 
