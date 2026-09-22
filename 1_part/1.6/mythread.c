@@ -69,7 +69,6 @@ static node_t *registry_take(mythread_t tid)
     return NULL;
 }
 
-// --- новое: тонкие обёртки над syscall futex(2) ---
 static long futex_wait(int *uaddr, int val)
 {
     return syscall(SYS_futex, uaddr, FUTEX_WAIT, val, NULL, NULL, 0);
