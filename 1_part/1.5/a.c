@@ -13,6 +13,8 @@ static pid_t gettid_wrap(void) {
 
 void handler(int signo) {
     (void)signo;
+    printf("[sigint_thread] pid=%d tid=%d: ",
+           getpid(), gettid());
     write(1, "SIGINT поймал обработчик\n", 41);
 }
 
