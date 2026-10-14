@@ -1,6 +1,10 @@
 #define _GNU_SOURCE
 #include "queue.h"
 
+//time timeout 10 ./queue-spin > /dev/null
+//top -H
+//timeout 30 stdbuf -oL ./queue-spin > out.txt
+
 queue_t* queue_init(int max_count) {
 	queue_t *q = malloc(sizeof(queue_t));
 	if (!q) {
