@@ -7,9 +7,9 @@ queue_t* queue_init(int max_count) {
 		printf("Cannot allocate memory for a queue\n");
 		abort();
 	}
-	sem_init(&q->lock, 0, 1);          // binary semaphore protecting the list
-	sem_init(&q->slots, 0, max_count); // free places
-	sem_init(&q->items, 0, 0);         // stored elements
+	sem_init(&q->lock, 0, 1);          
+	sem_init(&q->slots, 0, max_count); 
+	sem_init(&q->items, 0, 0);         
 	queue_common_init(q, max_count);
 	return q;
 }
@@ -33,7 +33,6 @@ int queue_add(queue_t *q, int val) {
 	return 1;
 }
 
-// blocks while the queue is empty
 int queue_get(queue_t *q, int *val) {
 	sem_wait(&q->items);
 	sem_wait(&q->lock);

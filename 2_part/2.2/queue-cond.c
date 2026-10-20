@@ -22,7 +22,6 @@ void queue_destroy(queue_t *q) {
 	free(q);
 }
 
-// blocks while the queue is full
 int queue_add(queue_t *q, int val) {
 	pthread_mutex_lock(&q->mutex);
 	q->add_attempts++;
@@ -34,7 +33,6 @@ int queue_add(queue_t *q, int val) {
 	return 1;
 }
 
-// blocks while the queue is empty
 int queue_get(queue_t *q, int *val) {
 	pthread_mutex_lock(&q->mutex);
 	q->get_attempts++;

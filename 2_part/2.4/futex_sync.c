@@ -63,6 +63,9 @@ static void mutex_unlock(futex_mutex_t *m) {
 }
 
 
+
+
+
 enum { M_SPIN, M_MUTEX, M_NONE };
 
 static int mode;
