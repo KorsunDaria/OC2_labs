@@ -1,3 +1,4 @@
+
 # Прокси
 
 ./proxy --port 8080 --max-client-threads 4 --cache-ttl 5
@@ -10,62 +11,69 @@
 
 ## 3. Схема архитектуры (воронья лапка)
 
+//сказали вроде схему приложить, я с бд только такие норм делаю
+
 ```mermaid
 erDiagram
     CLIENT ||--|| SESSION : "одно соединение"
-    WORKER ||--o{ SESSION : "ведет через poll"
-    SESSION ||--|| READER : "свой offset"
-    ENTRY ||--o{ READER : "читают запись"
-    CACHE ||--o{ ENTRY : "хранит в карте"
-    CACHE ||--|| MANAGER : "квота и LRU"
-    ENTRY ||--o| JOB : "качается один раз"
-    FETCHER ||--o| JOB : "берет из очереди"
-    ORIGIN ||--o{ FETCHER : "отвечает"
+    WORKER ||--o{ SESSION : "обслуживает через poll"
+    SESSION }o--|| ENTRY : "читает"
+    CACHE ||--o{ ENTRY : "хранит в hash map"
+    CACHE ||--|| MANAGER : "управляет квотой и LRU"
+    ENTRY ||--o| JOB : "порождает задание"
+    JOB_QUEUE ||--o{ JOB : "хранит задания"
+    FETCHER ||--|| JOB_QUEUE : "получает задания"
+    FETCHER }o--|| ORIGIN : "выполняет HTTP-запросы"
 
     CLIENT {
         int fd
     }
     WORKER {
-        int efd "будит воркера"
-        pqueue newq "новые сокеты"
+        int efd "eventfd для пробуждения"
+        pqueue newq "очередь новых сокетов"
+        session head "список сессий"
     }
     SESSION {
-        int fd 
-        sstate st "READ_REQ - STREAM"
+        int fd
+        sstate st "S_READ_REQ - S_ERROR_OUT"
         request_t req
-        char out "буфер 32 КБ"
-    }
-    READER {
-        size_t off "сколько уже отдали"
+        reader_t rd "встроенный reader"
+        size_t off "позиция чтения"
+        char out "буфер отправки 32 КБ"
     }
     CACHE {
         size_t used
-        size_t cap "квота"
-        size_t max
+        size_t cap "текущая квота"
+        size_t max "максимальная квота"
         int ttl_ms
     }
     ENTRY {
         string key "host:port/path?query"
         int refs
-        estate state "INIT BODY DONE FAILED"
-        int pass "без кэша"
+        estate state "E_INIT E_BODY E_DONE E_FAILED"
+        int pass "режим без кэширования"
         size_t len
-        int64 done_ms "для TTL"
+        int64 done_ms "время завершения для TTL"
     }
     MANAGER {
-        pthread mgr "расширяет квоту, чистит"
+        pthread_t mgr "поток управления кэшем"
+    }
+
+    JOB_QUEUE {
+        pqueue jobs "общая очередь заданий"
     }
     JOB {
         string host
-        string req "запрос к origin"
-        string body "для POST/PUT"
+        string port
+        string req "HTTP-запрос к origin"
+        string body "тело POST/PUT"
         int is_get
     }
     FETCHER {
-        pthread tid "всего 64"
+        pthread_t tid "всего 64 потока"
     }
     ORIGIN {
-        string host
+        string host "внешний HTTP-сервер"
     }
 ```
 
@@ -89,7 +97,8 @@ proxy/
      ├─ run_tests.sh, regress.sh, stress.sh
      └─ origin.py, evil_origin.py
 ```
-## 5. Цепочки вызовов
+
+## 5. Цепочки вызовов (для самых главных объектов логических )
 
 ### Запуск и остановка
 
@@ -169,4 +178,3 @@ mgr_main
  ├─ evict_one -> drop_entry -> map_remove / entry_free
  └─ broadcast(space_cv)    будит fetcher'ов
 ```
-
